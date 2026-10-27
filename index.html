@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gemma AI Chatbot</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:700px;margin:40px auto;padding:20px;background:#f3f4f6}
+h1{text-align:center}
+#chat{background:white;padding:20px;min-height:300px;border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+form{display:flex;gap:8px;margin-top:12px}
+input{flex:1;min-width:0;padding:12px}
+button{padding:12px 20px;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Gemma AI Chatbot</h1>
+<div id="chat">Hello! Ask me anything.</div>
+<form id="form">
+<input id="message" placeholder="Type a message..." required>
+<button id="send" type="submit">Send</button>
+</form>
+<script>
+const form=document.getElementById("form");
+const input=document.getElementById("message");
+const chat=document.getElementById("chat");
+const send=document.getElementById("send");
+
+form.addEventListener("submit",async(event)=>{
+ event.preventDefault();
+ const message=input.value.trim();
+ if(!message)return;
+ const user=document.createElement("p");
+ user.textContent="You: "+message;
+ chat.appendChild(user);
+ const answer=document.createElement("p");
+ answer.textContent="Gemma: Thinking...";
+ chat.appendChild(answer);
+ input.value="";
+ send.disabled=true;
+ try{
+  const response=await fetch("/chat",{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({message})
+  });
+  if(!response.ok)throw new Error(await response.text());
+  const data=await response.json();
+  answer.textContent="Gemma: "+data.reply;
+ }catch(error){
+  answer.textContent="Error: "+error.message;
+ }finally{
+  send.disabled=false;
+ }
+});
+</script>
+</body>
+</html>
